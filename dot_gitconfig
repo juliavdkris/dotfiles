@@ -1,0 +1,57 @@
+[user]
+	name = Julia van der Kris
+	email = juliavdkris@proton.me
+	signingkey = DCD4F68580A4349B
+[commit]
+	gpgsign = true
+[pull]
+	rebase = true
+[core]
+	pager = delta
+[init]
+	defaultbranch = main
+[branch]
+	autosetuprebase = always
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[alias]
+	count-lines-author = "! git log --author=\"$1\" --pretty=tformat: --numstat | awk '{ add += $1; subs += $2; loc += $1 - $2 } END { printf \"added lines: %s, removed lines: %s, total lines: %s\\n\", add, subs, loc }' #"
+	count-lines = "! git log | rg Author | sort -u | choose 1: | xargs -I % sh -c \"echo '%' && git count-lines-author '%' && echo\""
+	yeet-merged-branches = "! git branch -a --merged | rg '.*remotes/origin/([^ \t]*).*' -r '$1' | rg -v 'main' | xargs -I % git push origin :%"
+	diffsplit = "! git diff | delta --side-by-side"
+	change-commits = "!f() { VAR=$1; OLD=$2; NEW=$3; shift 3; git filter-branch --env-filter \"if [[ \\\"$`echo $VAR`\\\" = '$OLD' ]]; then export $VAR='$NEW'; fi\" $@; }; f "
+[pretty]
+	fancyoneline = format:%C(auto,yellow)%h%C(auto,magenta)% G? %C(auto,blue)%>(12,trunc)%ad %C(auto,green)%<(20,trunc)%aN%C(auto,reset)%s%C(auto,red)% gD% D
+
+
+# Git delta stuff
+[interactive]
+	diffFilter = delta --color-only
+[delta]
+	navigate = true
+[merge]
+	conflictstyle = diff3
+[diff]
+	colorMoved = default
+
+
+# difftastic stuff
+[diff]
+	tool = difftastic
+[difftool]
+	prompt = false
+[difftool "difftastic"]
+	cmd = difft "$LOCAL" "$REMOTE"
+[pager]
+	difftool = true
+[alias]
+	difft = difftool
+
+
+# Readable Bun lock diffs
+[diff "lockb"]
+	textconv = bun
+	binary = true
